@@ -18,49 +18,49 @@ import ToggleButtonGroup from "@mui/material/ToggleButtonGroup";
 export default function TodoList() {
   const { todos, setTodos } = useContext(TodosContext);
   const [inputField, setInputField] = useState("");
+  const [typeOfArray, setTypeOfArray] = useState("all");
 
+  // تحميل الـ todos من localStorage عند أول Render
   useEffect(() => {
     const storageTodos = JSON.parse(localStorage.getItem("todos")) ?? [];
     setTodos(storageTodos);
-  });
+  }, [setTodos]);
+
+  // حفظ أي تحديث على todos تلقائيًا
+  useEffect(() => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  }, [todos]);
 
   const handleButtonClick = () => {
+    if (inputField.trim() === "") return; // منع إضافة مهمة فارغة
+
     const newTodo = {
       id: uuidv4(),
-      title: inputField,
+      title: inputField.trim(),
       details: "",
       isCompleted: false,
     };
-    const updateTodos = [...todos, newTodo];
-    setTodos(updateTodos);
-    localStorage.setItem("todos", JSON.stringify(updateTodos));
-    setInputField(""); // Clear the input field after adding the todo
+    setTodos([...todos, newTodo]);
+    setInputField(""); // مسح حقل الإدخال بعد الإضافة
   };
 
-  // filter Arrays of todos
+  // ToggleButton handler
+  const handlerTypeOfArray = (event, newValue) => {
+    if (newValue !== null) {
+      setTypeOfArray(newValue);
+    }
+  };
 
-  const [typeOfArray, setTypeOfArray] = useState("all");
+  // فلترة المهام
+  const completed = todos.filter((t) => t.isCompleted);
+  const notCompleted = todos.filter((t) => !t.isCompleted);
 
-  function handlerTypeOfArray(e) {
-    setTypeOfArray(e.target.value);
-  }
-  const completed = todos.filter((t) => {
-    return t.isCompleted;
-  });
-
-  const notCompleted = todos.filter((t) => {
-    return !t.isCompleted;
-  });
-
-  let todosRender = todos;
-
-  if (typeOfArray === "completed") {
-    todosRender = completed;
-  } else if (typeOfArray === "notCompleted") {
-    todosRender = notCompleted;
-  } else {
-    todosRender = todos;
-  }
+  const todosRender =
+    typeOfArray === "completed"
+      ? completed
+      : typeOfArray === "notCompleted"
+      ? notCompleted
+      : todos;
 
   const todoItems = todosRender.map((e) => (
     <div key={e.id}>
@@ -79,7 +79,8 @@ export default function TodoList() {
             مهامي
             <Divider />
           </Typography>
-          <div style={{ direction: "ltr" }}>
+
+          <div style={{ direction: "ltr", marginBottom: "10px" }}>
             <ToggleButtonGroup
               color="secondary"
               exclusive
@@ -91,16 +92,12 @@ export default function TodoList() {
               <ToggleButton value="completed">منجز</ToggleButton>
               <ToggleButton value="all">الكل</ToggleButton>
             </ToggleButtonGroup>
-          </div>{" "}
+          </div>
+
           {todoItems}
-          <Box sx={{ width: "100%" }}>
-            <Grid
-              container
-              spacing={1}
-              rowSpacing={1}
-              columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-              style={{ marginTop: "20px" }}
-            >
+
+          <Box sx={{ width: "100%", marginTop: "20px" }}>
+            <Grid container spacing={1}>
               <Grid
                 item
                 xs={9}
@@ -124,7 +121,7 @@ export default function TodoList() {
                   variant="contained"
                   style={{ width: "100%", height: "100%" }}
                   onClick={handleButtonClick}
-                  disabled={inputField === 0}
+                  disabled={inputField.trim() === ""}
                 >
                   اضافة
                 </Button>
