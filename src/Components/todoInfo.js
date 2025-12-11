@@ -17,8 +17,6 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import TextField from "@mui/material/TextField";
-import { playSound } from "../sound";
-import { playFalseSound } from "../soundFalse";
 
 export default function TodoInfo(props) {
   const { todos, setTodos } = useContext(TodosContext);
